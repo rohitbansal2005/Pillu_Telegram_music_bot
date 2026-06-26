@@ -1,8 +1,9 @@
-pyrogram>=2.0.106
+pyrogram==2.0.106
 tgcrypto
 py-tgcalls
-yt-dlp
+ytsearch-python
 youtube-search-python
+pytubefix
 httpx==0.27.2
 python-dotenv
 requests

@@ -1,27 +1,32 @@
 import asyncio
 from typing import Dict, List, Tuple
-from yt_dlp import YoutubeDL
+from pytubefix import YouTube, Search
 from youtubesearchpython.__future__ import VideosSearch
 
-import os
-
 def get_yt_info_sync(query: str) -> dict:
-    ydl_opts = {
-        'format': 'bestaudio/best',
-        'noplaylist': True,
-        'quiet': True,
-        'nocheckcertificate': True,
-    }
-    
-    # Bypass YouTube Bot Protection using cookies
-    if os.path.exists("cookies.txt"):
-        ydl_opts['cookiefile'] = "cookies.txt"
-    with YoutubeDL(ydl_opts) as ydl:
-        try:
-            info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
-        except Exception:
-            info = ydl.extract_info(query, download=False)
-    return info
+    try:
+        if query.startswith("http"):
+            yt = YouTube(query, client='WEB')
+        else:
+            search = Search(query)
+            if not search.videos:
+                return None
+            yt = search.videos[0]
+            
+        audio_stream = yt.streams.get_audio_only()
+        if not audio_stream:
+            return None
+            
+        return {
+            'id': yt.video_id,
+            'title': yt.title,
+            'duration': yt.length,
+            'url': audio_stream.url,
+            'thumbnail': yt.thumbnail_url,
+        }
+    except Exception as e:
+        print(f"PyTubeFix Error: {e}")
+        return None
 
 async def get_yt_info(query: str) -> dict:
     loop = asyncio.get_event_loop()
