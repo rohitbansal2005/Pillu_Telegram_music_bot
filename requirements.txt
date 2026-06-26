@@ -4,6 +4,7 @@ py-tgcalls
 youtube-search-python
 pytubefix
 yt-dlp
+pyDes
 httpx==0.27.2
 python-dotenv
 requests
