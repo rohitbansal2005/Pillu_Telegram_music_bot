@@ -76,16 +76,16 @@ async def play_command(client: Client, message: Message):
         duration = search_results[0].get('duration', 'Unknown')
         
         # Step 2: Get high quality audio stream URL via yt-dlp
-        yt_info = await get_yt_info(video_url)
-        if not yt_info:
-            return await processing_msg.edit_text("❌ **YouTube Blocked the Request:** Please provide a valid `cookies.txt` file.")
-            
-        stream_url = yt_info.get('url')
+        song_info_data = await get_yt_info(video_url)
+        if not song_info_data:
+            await processing_msg.edit_text("❌ Song could not be found or extracted. Please try another query.")
+            return
+        stream_url = song_info_data.get('url')
         if not stream_url:
             return await processing_msg.edit_text("❌ **Failed to extract audio URL.**")
 
         chat_id = message.chat.id
-        thumbnail = yt_info.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg")
+        thumbnail = song_info_data.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg")
         song_info = {
             "title": title,
             "duration": duration,
