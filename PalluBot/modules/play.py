@@ -119,7 +119,7 @@ async def play_command(client: Client, message: Message):
                     chat_id,
                     MediaStream(
                         stream_url,
-                        audio_parameters=AudioQuality.HIGH
+                        audio_parameters=AudioQuality.MEDIUM
                     )
                 )
                 
@@ -167,7 +167,7 @@ async def stream_end_handler(client, update: Update):
                     chat_id,
                     MediaStream(
                         next_song["stream_url"],
-                        audio_parameters=AudioQuality.HIGH
+                        audio_parameters=AudioQuality.MEDIUM
                     )
                 )
             except Exception as play_err:
