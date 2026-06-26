@@ -12,7 +12,6 @@ def get_yt_info_sync(query: str) -> dict:
         'quiet': True,
         'extractor_args': {'youtube': ['player_client=android']},
         'nocheckcertificate': True,
-        'ignoreerrors': True,
     }
     
     # Bypass YouTube Bot Protection using cookies
