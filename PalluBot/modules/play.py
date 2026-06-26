@@ -81,7 +81,7 @@ async def play_command(client: Client, message: Message):
         duration = song_info_data.get('duration')
         
         chat_id = message.chat.id
-        thumbnail = song_info_data.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg")
+        thumbnail = song_info_data.get("thumbnail", "https://graph.org/file/857a2fbb08d95e0c52136.jpg")
         song_info = {
             "title": title,
             "duration": duration,
@@ -175,7 +175,7 @@ async def stream_end_handler(client, update: Update):
                 
             sent_msg = await app.send_photo(
                 chat_id,
-                photo=next_song.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"),
+                photo=next_song.get("thumbnail", "https://graph.org/file/857a2fbb08d95e0c52136.jpg"),
                 caption=format_playing_message(
                     next_song["title"], 
                     next_song["duration"], 

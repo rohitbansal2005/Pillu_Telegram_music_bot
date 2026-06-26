@@ -15,7 +15,7 @@ async def start_command(client: Client, message: Message):
         
     # Fallback to a default music image if user has no DP
     if not user_photo:
-        user_photo = "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"
+        user_photo = "https://graph.org/file/857a2fbb08d95e0c52136.jpg"
 
     caption = (
         f"Hey there, {message.from_user.mention}! 👋\n\n"

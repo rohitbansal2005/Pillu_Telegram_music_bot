@@ -67,7 +67,7 @@ async def skip_cmd(client: Client, message: Message):
             import asyncio
             
             sent_msg = await message.reply_photo(
-                photo=next_song.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"),
+                photo=next_song.get("thumbnail", "https://graph.org/file/857a2fbb08d95e0c52136.jpg"),
                 caption=format_playing_message(
                     next_song["title"], 
                     next_song["duration"], 

@@ -23,7 +23,7 @@ async def welcome_new_member(client: Client, message: Message):
                 print(f"Error fetching photo: {e}")
                 
             if not user_photo:
-                user_photo = "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"
+                user_photo = "https://graph.org/file/857a2fbb08d95e0c52136.jpg"
                 
             chat_name = message.chat.title
             
@@ -51,11 +51,19 @@ async def welcome_new_member(client: Client, message: Message):
                 ]
             ])
             
-            await message.reply_photo(
-                photo=user_photo,
-                caption=caption,
-                reply_markup=reply_markup
-            )
+            try:
+                await message.reply_photo(
+                    photo=user_photo,
+                    caption=caption,
+                    reply_markup=reply_markup
+                )
+            except Exception as photo_err:
+                print(f"Photo failed, falling back to text: {photo_err}")
+                await message.reply_text(
+                    text=caption,
+                    reply_markup=reply_markup
+                )
+                
             print("Welcome message sent successfully!")
     except Exception as e:
         print(f"Welcome module error: {e}")
