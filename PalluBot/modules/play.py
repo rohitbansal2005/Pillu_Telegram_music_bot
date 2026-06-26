@@ -63,33 +63,29 @@ async def play_command(client: Client, message: Message):
         return await message.reply_text("Please provide a song name. Example: `/play heat waves`")
 
     query = " ".join(message.command[1:])
-    processing_msg = await message.reply_text("🔍 **Searching for your song on YouTube...**")
+    processing_msg = await message.reply_text("🔍 **Searching for your song on JioSaavn...**")
 
     try:
-        # Step 1: Search on YouTube
-        search_results = await search_youtube(query)
-        if not search_results:
-            return await processing_msg.edit_text("❌ No results found on YouTube.")
+        # Step 1: Get high quality audio stream URL via JioSaavn
+        song_info_data = await get_yt_info(query)
         
-        video_url = search_results[0]['link']
-        title = search_results[0]['title']
-        duration = search_results[0].get('duration', 'Unknown')
-        
-        # Step 2: Get high quality audio stream URL via yt-dlp
-        song_info_data = await get_yt_info(video_url)
         if not song_info_data:
             await processing_msg.edit_text("❌ Song could not be found or extracted. Please try another query.")
             return
+            
         stream_url = song_info_data.get('url')
         if not stream_url:
             return await processing_msg.edit_text("❌ **Failed to extract audio URL.**")
 
+        title = song_info_data.get('title')
+        duration = song_info_data.get('duration')
+        
         chat_id = message.chat.id
         thumbnail = song_info_data.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg")
         song_info = {
             "title": title,
             "duration": duration,
-            "url": video_url,
+            "url": "https://www.jiosaavn.com",
             "stream_url": stream_url,
             "thumbnail": thumbnail,
             "requested_by": message.from_user.mention
