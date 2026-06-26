@@ -3,12 +3,18 @@ from typing import Dict, List, Tuple
 from yt_dlp import YoutubeDL
 from youtubesearchpython.__future__ import VideosSearch
 
+import os
+
 def get_yt_info_sync(query: str) -> dict:
     ydl_opts = {
         'format': 'bestaudio/best',
         'noplaylist': True,
         'quiet': True,
     }
+    
+    # Bypass YouTube Bot Protection using cookies
+    if os.path.exists("cookies.txt"):
+        ydl_opts['cookiefile'] = "cookies.txt"
     with YoutubeDL(ydl_opts) as ydl:
         try:
             info = ydl.extract_info(f"ytsearch:{query}", download=False)['entries'][0]
