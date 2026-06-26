@@ -103,7 +103,7 @@ async def play_command(client: Client, message: Message):
             await processing_msg.delete()
             
             queue_msg = (
-                f"⌈StarBoy ™ ⋈ Music▷⌋\n"
+                f"⌈Pallu 🎵 Music▷⌋\n"
                 f"➲ ADDED TO QUEUE AT #{position}\n\n"
                 f"▸ **TITLE :** {title}\n"
                 f"▸ **DURATION :** {duration} MINUTES\n"
