@@ -35,13 +35,30 @@ def get_yt_info_sync(query: str, search_title: str = None) -> dict:
         print(f"SoundCloud Extraction Error: {e}")
         return None
 
+import re
+
+def clean_title(title: str) -> str:
+    if not title:
+        return ""
+    title = re.sub(r'\[.*?\]|\(.*?\)', '', title)
+    words_to_remove = ['official', 'video', 'lyrical', 'hd', '4k', '8k', 'audio', 'full song', 't-series', 'tseries']
+    for word in words_to_remove:
+        title = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE).sub('', title)
+    title = re.sub(r'[^a-zA-Z0-9\s]', ' ', title)
+    title = re.sub(r'\s+', ' ', title).strip()
+    words = title.split()
+    if len(words) > 5:
+        title = ' '.join(words[:5])
+    return title.strip()
+
 async def get_yt_info(query: str) -> dict:
     search_title = None
     if query.startswith("http"):
         try:
-            # Get the title from YouTube first, then search it on SoundCloud
+            # Get the title from YouTube first, then clean it and search it on SoundCloud
             video_info = await Video.getInfo(query)
-            search_title = video_info.get('title', '')
+            raw_title = video_info.get('title', '')
+            search_title = clean_title(raw_title)
         except:
             pass
 
