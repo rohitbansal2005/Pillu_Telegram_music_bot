@@ -7,7 +7,7 @@ from pytubefix import YouTube, Search
 def get_yt_info_sync(query: str) -> dict:
     try:
         if query.startswith("http"):
-            yt = YouTube(query, client='WEB')
+            yt = YouTube(query, client='TV')
         else:
             search = Search(query)
             if not search.videos:
