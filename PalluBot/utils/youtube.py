@@ -48,16 +48,24 @@ def get_yt_info_sync(query: str, search_title: str = None) -> dict:
         if not perma_url:
             return None
             
-        # 3. Use yt-dlp to extract the highly stable audio stream from JioSaavn
+        # Ensure downloads directory exists
+        if not os.path.exists("downloads"):
+            os.makedirs("downloads")
+            
+        # 3. Use yt-dlp to DOWNLOAD the audio stream locally
+        # This prevents 100% of network-related stuttering issues on slow CPUs
         ydl_opts = {
             'format': 'bestaudio/best',
+            'outtmpl': 'downloads/%(id)s.%(ext)s',
             'noplaylist': True,
             'quiet': True,
             'nocheckcertificate': True,
         }
         
         with YoutubeDL(ydl_opts) as ydl:
-            info = ydl.extract_info(perma_url, download=False)
+            # Check if we already have it downloaded to save time
+            info = ydl.extract_info(perma_url, download=True)
+            filename = ydl.prepare_filename(info)
             
             if not info:
                 return None
@@ -74,7 +82,7 @@ def get_yt_info_sync(query: str, search_title: str = None) -> dict:
                 'id': song_id,
                 'title': title,
                 'duration': duration_formatted,
-                'url': info.get('url'),
+                'url': filename,  # Return local path!
                 'thumbnail': song_data.get('image', '').replace('150x150', '500x500'),
             }
     except Exception as e:

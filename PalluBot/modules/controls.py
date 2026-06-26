@@ -3,7 +3,7 @@ from pyrogram.types import Message, CallbackQuery
 from pyrogram.enums import ChatMemberStatus
 from PalluBot import app, call_py
 from PalluBot.utils.queue import get_queue, clear_queue, remove_from_queue, pop_from_queue, active_progress_tasks
-from pytgcalls.types import MediaStream
+from pytgcalls.types import MediaStream, AudioQuality
 
 async def is_admin(client: Client, chat_id: int, user_id: int) -> bool:
     try:
@@ -60,8 +60,24 @@ async def skip_cmd(client: Client, message: Message):
         try:
             if chat_id in active_progress_tasks:
                 active_progress_tasks[chat_id].cancel()
-            await call_py.play(chat_id, MediaStream(next_song["stream_url"]))
-            await message.reply_text(f"⏭ **Skipped!** Now playing: {next_song['title']}")
+            await call_py.play(chat_id, MediaStream(next_song["stream_url"], audio_parameters=AudioQuality.MEDIUM))
+            
+            from PalluBot.utils.theme import format_playing_message, play_keyboard
+            from PalluBot.modules.play import update_progress_bar
+            import asyncio
+            
+            sent_msg = await message.reply_photo(
+                photo=next_song.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"),
+                caption=format_playing_message(
+                    next_song["title"], 
+                    next_song["duration"], 
+                    next_song["requested_by"],
+                    0, 0
+                ),
+                reply_markup=play_keyboard()
+            )
+            
+            active_progress_tasks[chat_id] = asyncio.create_task(update_progress_bar(chat_id, sent_msg, next_song))
         except Exception as e:
             await message.reply_text(f"❌ Error skipping: {e}")
     else:
