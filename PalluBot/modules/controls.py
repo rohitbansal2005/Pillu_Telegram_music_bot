@@ -47,6 +47,16 @@ async def skip_cmd(client: Client, message: Message):
     if len(queue) > 1:
         pop_from_queue(chat_id)
         next_song = queue[0]
+        
+        # RE-FETCH URL TO PREVENT EXPIRATION
+        from PalluBot.utils.youtube import get_yt_info
+        try:
+            fresh_info = await get_yt_info(next_song.get("query", next_song["title"]))
+            if fresh_info and fresh_info.get("url"):
+                next_song["stream_url"] = fresh_info.get("url")
+        except Exception as refetch_err:
+            pass
+
         try:
             if chat_id in active_progress_tasks:
                 active_progress_tasks[chat_id].cancel()

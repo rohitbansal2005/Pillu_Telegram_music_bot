@@ -88,13 +88,14 @@ async def play_command(client: Client, message: Message):
             "url": "https://www.jiosaavn.com",
             "stream_url": stream_url,
             "thumbnail": thumbnail,
-            "requested_by": message.from_user.mention
+            "requested_by": message.from_user.mention,
+            "query": query
         }
 
         # Step 3: Check if something is already playing
         queue = get_queue(chat_id)
         if len(queue) > 0:
-            position = len(queue)
+            position = len(queue) + 1
             add_to_queue(chat_id, song_info)
             await processing_msg.delete()
             
@@ -143,36 +144,52 @@ from pytgcalls import filters as ptc_filters
 
 @call_py.on_update(ptc_filters.stream_end)
 async def stream_end_handler(client, update: Update):
-    chat_id = update.chat_id
-    # Remove the currently playing song
-    pop_from_queue(chat_id)
-    
-    # Check for next song
-    queue = get_queue(chat_id)
-    if len(queue) > 0:
-        next_song = queue[0]
-        await call_py.play(
-            chat_id,
-            MediaStream(
-                next_song["stream_url"],
-                audio_parameters=AudioQuality.HIGH
+    try:
+        chat_id = update.chat_id
+        # Remove the currently playing song
+        pop_from_queue(chat_id)
+        
+        # Check for next song
+        queue = get_queue(chat_id)
+        if len(queue) > 0:
+            next_song = queue[0]
+            
+            # RE-FETCH URL TO PREVENT EXPIRATION
+            try:
+                fresh_info = await get_yt_info(next_song.get("query", next_song["title"]))
+                if fresh_info and fresh_info.get("url"):
+                    next_song["stream_url"] = fresh_info.get("url")
+            except Exception as refetch_err:
+                print(f"Refetch failed: {refetch_err}")
+
+            try:
+                await call_py.play(
+                    chat_id,
+                    MediaStream(
+                        next_song["stream_url"],
+                        audio_parameters=AudioQuality.HIGH
+                    )
+                )
+            except Exception as play_err:
+                print(f"Play failed in stream_end, trying again: {play_err}")
+                
+            sent_msg = await app.send_photo(
+                chat_id,
+                photo=next_song.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"),
+                caption=format_playing_message(
+                    next_song["title"], 
+                    next_song["duration"], 
+                    next_song["requested_by"],
+                    0, 0
+                ),
+                reply_markup=play_keyboard()
             )
-        )
-        sent_msg = await app.send_photo(
-            chat_id,
-            photo=next_song.get("thumbnail", "https://telegra.ph/file/857a2fbb08d95e0c52136.jpg"),
-            caption=format_playing_message(
-                next_song["title"], 
-                next_song["duration"], 
-                next_song["requested_by"],
-                0, 0
-            ),
-            reply_markup=play_keyboard()
-        )
-        if chat_id in active_progress_tasks:
-            active_progress_tasks[chat_id].cancel()
-        active_progress_tasks[chat_id] = asyncio.create_task(update_progress_bar(chat_id, sent_msg, next_song))
-    else:
-        # No more songs, leave call
-        await call_py.leave_call(chat_id)
-        remove_from_queue(chat_id)
+            if chat_id in active_progress_tasks:
+                active_progress_tasks[chat_id].cancel()
+            active_progress_tasks[chat_id] = asyncio.create_task(update_progress_bar(chat_id, sent_msg, next_song))
+        else:
+            # No more songs, leave call
+            await call_py.leave_call(chat_id)
+            remove_from_queue(chat_id)
+    except Exception as e:
+        print(f"Error in stream_end_handler: {e}")
