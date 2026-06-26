@@ -1,7 +1,7 @@
 FROM python:3.10-slim-bookworm
 
 RUN apt-get update && \
-    apt-get install -y ffmpeg git && \
+    apt-get install -y ffmpeg git nodejs && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
