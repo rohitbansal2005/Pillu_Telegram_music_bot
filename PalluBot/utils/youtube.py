@@ -7,7 +7,7 @@ from yt_dlp import YoutubeDL
 def get_yt_info_sync(query: str, search_title: str = None) -> dict:
     try:
         ydl_opts = {
-            'format': 'bestaudio/best',
+            'format': 'bestaudio[protocol^=http]/bestaudio/best',
             'noplaylist': True,
             'quiet': True,
         }
