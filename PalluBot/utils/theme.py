@@ -60,4 +60,5 @@ def format_playing_message(title: str, duration: str, requested_by: str, played_
 `{timeline}`
 
 **Powered by Pallu Music 🎶**
+**Developed by @rootpii**
 """
