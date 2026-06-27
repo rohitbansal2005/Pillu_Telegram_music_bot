@@ -2,7 +2,7 @@ import pyrogram
 from pyrogram import filters, Client
 from pyrogram.types import Message
 from pytgcalls.types import MediaStream, Update, AudioQuality
-from PalluBot import app, call_py
+from PalluBot import app, call_py, assistant
 from PalluBot.utils.youtube import get_yt_info, search_youtube
 from PalluBot.utils.queue import add_to_queue, get_queue, pop_from_queue, clear_queue, remove_from_queue, active_progress_tasks
 from PalluBot.utils.theme import play_keyboard, format_playing_message, queue_keyboard
@@ -113,13 +113,33 @@ async def play_command(client: Client, message: Message):
             )
         else:
             # Play directly
+            from pyrogram.errors import PeerIdInvalid, UserAlreadyParticipant
+            try:
+                await assistant.get_chat(chat_id)
+            except PeerIdInvalid:
+                try:
+                    try:
+                        await app.add_chat_members(chat_id, assistant.me.id)
+                    except Exception:
+                        if message.chat.username:
+                            await assistant.join_chat(message.chat.username)
+                        else:
+                            invite_link = await app.export_chat_invite_link(chat_id)
+                            await assistant.join_chat(invite_link)
+                except UserAlreadyParticipant:
+                    pass
+                except Exception as ex:
+                    return await processing_msg.edit_text(f"❌ **Assistant could not join the group.** Please add `@pallu_music_assistant` manually or give me Admin rights to invite users.\n`{str(ex)}`")
+            except Exception:
+                pass
+
             add_to_queue(chat_id, song_info)
             try:
                 await call_py.play(
                     chat_id,
                     MediaStream(
                         stream_url,
-                        audio_parameters=AudioQuality.MEDIUM
+                        audio_parameters=AudioQuality.LOW
                     )
                 )
                 
@@ -142,7 +162,7 @@ async def play_command(client: Client, message: Message):
 
 from pytgcalls import filters as ptc_filters
 
-@call_py.on_update(ptc_filters.stream_end)
+@call_py.on_update(ptc_filters.stream_end())
 async def stream_end_handler(client, update: Update):
     try:
         chat_id = update.chat_id
@@ -167,7 +187,7 @@ async def stream_end_handler(client, update: Update):
                     chat_id,
                     MediaStream(
                         next_song["stream_url"],
-                        audio_parameters=AudioQuality.MEDIUM
+                        audio_parameters=AudioQuality.LOW
                     )
                 )
             except Exception as play_err:

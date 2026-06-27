@@ -60,7 +60,7 @@ async def skip_cmd(client: Client, message: Message):
         try:
             if chat_id in active_progress_tasks:
                 active_progress_tasks[chat_id].cancel()
-            await call_py.play(chat_id, MediaStream(next_song["stream_url"], audio_parameters=AudioQuality.MEDIUM))
+            await call_py.play(chat_id, MediaStream(next_song["stream_url"], audio_parameters=AudioQuality.LOW))
             
             from PalluBot.utils.theme import format_playing_message, play_keyboard
             from PalluBot.modules.play import update_progress_bar

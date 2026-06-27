@@ -8,7 +8,29 @@ async def welcome_new_member(client: Client, message: Message):
     try:
         for member in message.new_chat_members:
             if member.is_bot:
-                print(f"Ignored bot: {member.first_name}")
+                if member.id == (await client.get_me()).id:
+                    # Bot was added to the group!
+                    bot_username = (await client.get_me()).username
+                    intro_caption = (
+                        "🎵 **Thanks for adding me to this group!** 🎵\n\n"
+                        "I am **Pallu Music Bot**, ready to play high-quality music in your Voice Chats.\n\n"
+                        "💡 **How to use me:**\n"
+                        "1. Make me an **Admin** with invite permissions (so I can invite my assistant).\n"
+                        "2. Start a Voice Chat in this group.\n"
+                        "3. Type `/play <song name>` to start listening!\n\n"
+                        "Use `/help` to see all commands."
+                    )
+                    reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("📚 Commands", callback_data="help_commands")]])
+                    try:
+                        await message.reply_photo(
+                            photo="https://graph.org/file/857a2fbb08d95e0c52136.jpg",
+                            caption=intro_caption,
+                            reply_markup=reply_markup
+                        )
+                    except Exception:
+                        await message.reply_text(text=intro_caption, reply_markup=reply_markup)
+                else:
+                    print(f"Ignored bot: {member.first_name}")
                 continue
                 
             print(f"Welcoming user: {member.first_name}")
