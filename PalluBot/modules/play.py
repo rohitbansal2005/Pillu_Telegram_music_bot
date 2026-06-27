@@ -51,8 +51,13 @@ async def update_progress_bar(chat_id: int, message: Message, song_info: dict):
         except Exception:
             break
 
+from config import ALLOWED_GROUP_ID
+
 @app.on_message(filters.command(["play", "pallu"]))
 async def play_command(client: Client, message: Message):
+    if ALLOWED_GROUP_ID and message.chat.id != ALLOWED_GROUP_ID:
+        return await message.reply_text("❌ **This is a Private Bot!**\n\nI am configured to play music only in my owner's specific group.")
+
     if message.chat.type == pyrogram.enums.ChatType.PRIVATE:
         return await message.reply_text("❌ **Please use this command in a Group Chat!** I need to join a Voice Chat to play music.")
 
