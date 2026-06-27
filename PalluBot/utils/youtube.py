@@ -11,7 +11,7 @@ def clean_title(title: str) -> str:
     if not title:
         return ""
     title = re.sub(r'\[.*?\]|\(.*?\)', '', title)
-    words_to_remove = ['official', 'video', 'lyrical', 'hd', '4k', '8k', 'audio', 'full song', 't-series', 'tseries']
+    words_to_remove = ['official', 'video', 'lyrical', 'hd', '4k', '8k', 'audio', 'full song', 't-series', 'tseries', 'slowed', 'reverb', 'lofi', 'remix', 'dj', 'mashup']
     for word in words_to_remove:
         title = re.compile(r'\b' + re.escape(word) + r'\b', re.IGNORECASE).sub('', title)
     title = re.sub(r'[^a-zA-Z0-9\s]', ' ', title)
@@ -99,6 +99,8 @@ async def get_yt_info(query: str) -> dict:
             search_title = clean_title(raw_title)
         except:
             pass
+    else:
+        search_title = clean_title(query)
             
     loop = asyncio.get_event_loop()
     return await loop.run_in_executor(None, get_yt_info_sync, query, search_title)
