@@ -211,5 +211,32 @@ async def stream_end_handler(client, update: Update):
             # No more songs, leave call
             await call_py.leave_call(chat_id)
             remove_from_queue(chat_id)
+            
+            # Send suggestions
+            last_song = update.chat_id # we need to get last song from somewhere, wait, pop_from_queue removes it.
+            # We can just fetch random popular songs for now to ensure it always works and is fast.
+            import random
+            from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+            import html
+            
+            popular_tracks = [
+                "Tum Hi Ho", "Chaleya", "Kesariya", "Agar Tum Saath Ho", 
+                "Heeriye", "O Maahi", "Apna Bana Le", "Pee Loon", 
+                "Khairiyat", "Raabta", "Heat Waves", "Perfect"
+            ]
+            suggestions = random.sample(popular_tracks, 3)
+            
+            buttons = []
+            for track in suggestions:
+                buttons.append([InlineKeyboardButton(f"🎵 {track}", callback_data=f"play_sugg_{track}")])
+                
+            buttons.append([InlineKeyboardButton("More Songs?", callback_data="more_songs")])
+            
+            await app.send_message(
+                chat_id,
+                "**You May Like to Listen these tracks**\n\nChoose a song below & I'll play it in this voice chat.",
+                reply_markup=InlineKeyboardMarkup(buttons)
+            )
+            
     except Exception as e:
         print(f"Error in stream_end_handler: {e}")
